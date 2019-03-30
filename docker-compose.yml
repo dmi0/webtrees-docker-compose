@@ -1,0 +1,50 @@
+version: '3'
+
+volumes:
+  www-root:
+  data-volume:
+
+networks:
+    backend-network:
+      driver: bridge
+
+services:
+  setup:
+    volumes:
+      - www-root:/var/www/html
+    build: 
+      context: ./app
+      args:
+        - WEBTREES_VERSION=${WEBTREES_VERSION}
+
+  php:
+    depends_on:
+      - setup
+    volumes:
+      - www-root:/var/www/html
+    build:
+      context: ./php
+    networks:
+      - backend-network
+
+  database:
+    image: mariadb
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+    volumes:
+      - data-volume:/var/lib/mysql
+    networks:
+      - backend-network
+
+  web:
+    depends_on:
+      - php
+      - database
+    image: nginx:latest
+    ports:
+        - "${PORT}:80"
+    volumes:
+        - www-root:/var/www/html
+        - ./appsite.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - backend-network
