@@ -26,6 +26,7 @@ services:
       context: ./php
     networks:
       - backend-network
+    restart: always
 
   database:
     image: mariadb
@@ -35,6 +36,7 @@ services:
       - data-volume:/var/lib/mysql
     networks:
       - backend-network
+    restart: always
 
   web:
     depends_on:
@@ -48,3 +50,4 @@ services:
         - ./appsite.conf:/etc/nginx/conf.d/default.conf
     networks:
       - backend-network
+    restart: always
